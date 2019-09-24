@@ -1,0 +1,24 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "",
+        "limitSymbolsToIncludedHeaders": true
+      },
+      "includePath": [
+        "/home/guoxt/catkin_ws/devel/include/**",
+        "/opt/ros/melodic/include/**",
+        "/home/guoxt/catkin_ws/src/hector_slam/hector_geotiff/include/**",
+        "/home/guoxt/catkin_ws/src/hector_slam/hector_map_tools/include/**",
+        "/home/guoxt/catkin_ws/src/hector_slam/hector_mapping/include/**",
+        "/home/guoxt/catkin_ws/src/hector_slam/hector_marker_drawing/include/**",
+        "/home/guoxt/catkin_ws/src/learning_communication/include/**",
+        "/home/guoxt/catkin_ws/src/learning_tf/include/**",
+        "/home/guoxt/catkin_ws/src/treasure_hunter/mbot_voice/include/**",
+        "/home/guoxt/catkin_ws/src/turtle_control/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS"
+    }
+  ]
+}
