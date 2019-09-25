@@ -20,11 +20,10 @@ class image_converter:
     def __init__(self):    
         # 创建cv_bridge，声明图像的发布者和订阅者
         ######################################请补充此处代码（开始）######################################################
-
-
-
-
-
+        self.image_pub = rospy.Publisher("object_detect_image", Image, queue_size=1)
+        self.target_pub = rospy.Publisher("object_detect_pose", Pose, queue_size=1)
+        self.bridge = CvBridge()
+        self.image_sub = rospy.Subscriber("/camera/image_raw",Image, self.callback)
 
         ######################################请补充此处代码（结束）######################################################
 
@@ -71,9 +70,9 @@ class image_converter:
             cv2.drawContours(cv_image, [c], -1, (0, 0, 255), 2)
             cv2.circle(cv_image, (cX, cY), 1, (0, 0, 255), -1)
             objPose = Pose()
-            objPose.position.x = cX;
-            objPose.position.y = cY;
-            objPose.position.z = M["m00"];
+            objPose.position.x = cX
+            objPose.position.y = cY
+            objPose.position.z = M["m00"]
             self.target_pub.publish(objPose)
 
         # 显示Opencv格式的图像

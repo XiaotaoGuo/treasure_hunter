@@ -51,26 +51,49 @@ class ExploringMaze():
        
         # 开始主循环，随机导航  
         while not rospy.is_shutdown():
-######################################请补充主循环中的代码（开始）######################################################
+        ##############################请补充主循环中的代码（开始）#################################################
+            self.goal = MoveBaseGoal()
+            self.goal.target_pose.pose = start_location
+            self.goal.target_pose.header.frame_id = 'map'
+            self.goal.target_pose.header.stamp = rospy.Time.now()
 
+            if self.exploring_cmd is STATUS_EXPLORING:
+                self.goal.target_pose.pose.position.x = random.randint(0, 8)
+                self.goal.target_pose.pose.position.y = random.randint(0, 9)
+            elif self.exploring_cmd is STATUS_GO_HOME:
+                rospy.sleep(0.1)
+                continue
+            elif self.exploring_cmd is STATUS_GO_HOME:
+                self.goal.target_pose.pose.position.x = 0
+                self.goal.target_pose.pose.position.y = 0
 
+            rospy.loginfo("Going to: " + str(self.goal.target_pose.pose))
 
+            self.move_base.send_goal(self.goal)
 
+            finished_within_time = self.move_base.wait_for_result(rospy.Duration(300))
 
+            if not finished_within_time:
+                self.move_base.cancel_goal()
+                rospy.loginfo("Time out achieving goal")
+            else:
+                state = self.move_base.get_state()
+                if state == GoalStatus.SUCCEEDED:
+                    rospy.loginfo("Goal succeeded")
+                else:
+                    rospy.loginfo("Goal failed")
 
+            running_time = rospy.Time.now() - start_time
+            running_time = running_time.secs / 60.0
 
+            rospy.loginfo("Current time: " + str(trunc(running_time, 1)) + " min")
 
+            if self.exploring_cmd is STATUS_GO_HOME:
+                break
+            else:
+                rospy.sleep(self.rest_time)
 
-
-
-
-
-
-
-
-
-
-######################################请补充主循环中的代码（结束）######################################################
+        #############################请补充主循环中的代码（结束）###############################################
         self.shutdown()
 
     def cmdCallback(self, msg):
