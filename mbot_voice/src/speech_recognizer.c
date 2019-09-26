@@ -241,7 +241,7 @@ int sr_start_listening(struct speech_rec *sr)
 		return -E_SR_ALREADY;
 	}
 
-	session_id = QISRSessionBegin(NULL, sr->session_begin_params, &errcode); //ÌýÐ´²»ÐèÒªÓï·¨£¬µÚÒ»¸ö²ÎÊýÎªNULL
+	session_id = QISRSessionBegin(NULL, sr->session_begin_params, &errcode); 
 	if (MSP_SUCCESS != errcode)
 	{
 		sr_dbg("\nQISRSessionBegin failed! error code:%d\n", errcode);
@@ -340,7 +340,7 @@ int sr_write_audio_data(struct speech_rec *sr, char *data, unsigned int len)
 	}
 	sr->audio_status = MSP_AUDIO_SAMPLE_CONTINUE;
 
-	if (MSP_REC_STATUS_SUCCESS == sr->rec_stat) { //ÒÑ¾­ÓÐ²¿·ÖÌýÐ´½á¹û
+	if (MSP_REC_STATUS_SUCCESS == sr->rec_stat) { //ï¿½Ñ¾ï¿½ï¿½Ð²ï¿½ï¿½ï¿½ï¿½ï¿½Ð´ï¿½ï¿½ï¿½
 		rslt = QISRGetResult(sr->session_id, &sr->rec_stat, 0, &ret);
 		if (MSP_SUCCESS != ret)	{
 			sr_dbg("\nQISRGetResult failed! error code: %d\n", ret);

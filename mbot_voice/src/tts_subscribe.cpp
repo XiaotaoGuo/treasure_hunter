@@ -193,12 +193,13 @@ int main(int argc, char* argv[])
 		//goto exit ;//登录失败，退出登录
         toExit();
 	}
+	/*
 	printf("\n###########################################################################\n");
 	printf("## 语音合成（Text To Speech，TTS）技术能够自动将任意文字实时转换为连续的 ##\n");
 	printf("## 自然语音，是一种能够在任何时间、任何地点，向任何人提供语音信息服务的  ##\n");
 	printf("## 高效便捷手段，非常符合信息时代海量数据、动态更新和个性化查询的需求。  ##\n");
 	printf("###########################################################################\n\n");
-
+	*/
     ros::init(argc,argv,"TextToSpeech");
     ros::NodeHandle n;
     ros::Subscriber sub =n.subscribe("voiceWords", 1000, voiceWordsCallback);

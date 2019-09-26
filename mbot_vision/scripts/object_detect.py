@@ -61,7 +61,9 @@ class image_converter:
             # compute the center of the contour
             M = cv2.moments(c)
 
-            if int(M["m00"]) not in range(20000, 250000):
+            if int(M["m00"]) not in range(10000, 250000):
+                if int(M["m00"]) > 2000:
+                    rospy.loginfo("find red area of %0.2f", M["m00"])
                 continue
 
             cX = int(M["m10"] / M["m00"])

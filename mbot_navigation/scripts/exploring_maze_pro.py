@@ -18,6 +18,8 @@ class ExploringMaze():
     def __init__(self):  
         rospy.init_node('exploring_maze_pro', anonymous=True)  
         rospy.on_shutdown(self.shutdown)  
+        self.init_flag = False
+        self.goal_flag = False
 
         # 在每个目标位置暂停的时间 (单位：s)
         self.rest_time = rospy.get_param("~rest_time", 0.5)  
@@ -50,36 +52,73 @@ class ExploringMaze():
 
         locations.append(Pose(Point(-0.002, 7.663, 0.000),  Quaternion(0.000, 0.000, 0.709016873598, 0.705191515089)))  
         ##############################请补充更多位置（开始）#########################################
-
-
-
-
+        locations.append(Pose(Point(3.0, 4.0, 0.000),  Quaternion(0.000, 0.000, 0.709016873598, 0.705191515089)))
+        locations.append(Pose(Point(3.0, 8.0, 0.000),  Quaternion(0.000, 0.000, 0.709016873598, 0.705191515089)))
+        locations.append(Pose(Point(3.0, 1.0, 0.000),  Quaternion(0.000, 0.000, 0.709016873598, 0.705191515089)))
+        locations.append(Pose(Point(6.0, 8.0, 0.000),  Quaternion(0.000, 0.000, 0.709016873598, 0.705191515089)))
+        locations.append(Pose(Point(3.0, 8.0, 0.000),  Quaternion(0.000, 0.000, 0.709016873598, 0.705191515089)))
         ##############################请补充更多位置（结束）#########################################
 
         # 命令初值
         self.exploring_cmd = 0
         
-        location = 0
+        location = random.randint(0, 6)
        
         # 开始主循环，随机导航  
         while not rospy.is_shutdown():
         ##############################请补充主循环中的代码（开始）###################################
+            self.goal = MoveBaseGoal()
+            self.goal.target_pose.pose = start_location
+            self.goal.target_pose.header.frame_id = 'map'
+            self.goal.target_pose.header.stamp = rospy.Time.now()
 
+            if self.exploring_cmd is STATUS_EXPLORING:
+                self.goal.target_pose.pose = locations[location % 6]
+                ratio_x = 1.0 + random.randint(0, 20) / 100.0
+                ratio_y = 1.0 + random.randint(0, 20) / 100.0
+                self.goal.target_pose.x *= ratio_x
+                self.goal.target_pose.x *= ratio_y
+                location += 1
+            elif self.exploring_cmd is STATUS_CLOSE_TARGET:
+                rospy.sleep(0.1)
+                continue
+            elif self.exploring_cmd is STATUS_GO_HOME:
+                self.goal.target_pose.pose.position.x = 0
+                self.goal.target_pose.pose.position.y = 0
 
+            rospy.loginfo("Current position idx: " + str(location) + ", Going to: " + str(self.goal.target_pose.pose))
 
+            self.move_base.send_goal(self.goal)
+            self.goal_flag = True
+            if not self.init_flag:
+                finished_within_time = self.move_base.wait_for_result(rospy.Duration(1))
+                location -= 1
+                self.init_flag = True
+            else:
+                finished_within_time = self.move_base.wait_for_result(rospy.Duration(300))
 
+            if not finished_within_time:
+                self.move_base.cancel_goal()
+                self.goal_flag = False
+                if self.init_flag:
+                    rospy.loginfo("Time out achieving goal")
+            else:
+                state = self.move_base.get_state()
+                if state == GoalStatus.SUCCEEDED:
+                    rospy.loginfo("Goal succeeded")
+                else:
+                    rospy.loginfo("Goal failed")
+            self.goal_flag = False
+            
+            running_time = rospy.Time.now() - start_time
+            running_time = running_time.secs / 60.0
 
+            rospy.loginfo("Current time: " + str(trunc(running_time, 1)) + " min")
 
-
-
-
-
-
-
-
-
-
-
+            if self.exploring_cmd is STATUS_GO_HOME:
+                break
+            else:
+                rospy.sleep(self.rest_time)
 
 ######################################请补充主循环中的代码（结束）######################################################
         self.shutdown()

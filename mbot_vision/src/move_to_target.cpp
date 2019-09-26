@@ -24,7 +24,7 @@ void poseCallback(const geometry_msgs::Pose::ConstPtr& msg)
     // 将接收到的消息打印出来
     ROS_INFO("Target pose: x:%0.6f, y:%0.6f, z:%0.6f", msg->position.x, msg->position.y, msg->position.z);
 
-    /******************************请补充此处代码（开始）*******************************************/
+    
     if(status_flag == STATUS_EXPLORING){
         status_flag = STATUS_CLOSE_TARGET;
         std_msgs::Int8 cmd;
@@ -43,27 +43,18 @@ void poseCallback(const geometry_msgs::Pose::ConstPtr& msg)
 
         std_msgs::String msg;
         msg.data = "Treasure got, going home.";
+        voice_pub.publish(msg);
     }
     else if(status_flag == STATUS_CLOSE_TARGET){
         geometry_msgs::Twist vel_msg;
-        vel_msg.linear.x = (10000 - msg->position.z) / 100000 * 0.3;
-        vel_msg.angular.z = (640 - msg->position.x) / 640 * 0.3;
+        vel_msg.linear.x = (150000.0 - msg->position.z) / 150000.0 * 0.2;
+        vel_msg.angular.z = (640.0 - msg->position.x) / 640.0 * 0.3;
 
         vel_pub.publish(vel_msg);
         ROS_INFO("Publish velocity command[%0.2f m/s, %0.2f rad/s]", vel_msg.linear.x, vel_msg.angular.z);
     }
 
-
-
-
-
-
-
-
-
-
-
-    /******************************请补充此处代码（结束）*******************************************/
+    
 }
 
 int main(int argc, char **argv)

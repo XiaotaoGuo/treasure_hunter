@@ -17,7 +17,9 @@ STATUS_GO_HOME      = 2
 class ExploringMaze():
     def __init__(self):  
         rospy.init_node('exploring_maze', anonymous=True)  
-        rospy.on_shutdown(self.shutdown)  
+        rospy.on_shutdown(self.shutdown)
+        self.init_flag = False
+        self.goal_flag = False
 
         # 在每个目标位置暂停的时间 (单位：s)
         self.rest_time = rospy.get_param("~rest_time", 0.5)  
@@ -60,7 +62,7 @@ class ExploringMaze():
             if self.exploring_cmd is STATUS_EXPLORING:
                 self.goal.target_pose.pose.position.x = random.randint(0, 8)
                 self.goal.target_pose.pose.position.y = random.randint(0, 9)
-            elif self.exploring_cmd is STATUS_GO_HOME:
+            elif self.exploring_cmd is STATUS_CLOSE_TARGET:
                 rospy.sleep(0.1)
                 continue
             elif self.exploring_cmd is STATUS_GO_HOME:
@@ -70,19 +72,26 @@ class ExploringMaze():
             rospy.loginfo("Going to: " + str(self.goal.target_pose.pose))
 
             self.move_base.send_goal(self.goal)
-
-            finished_within_time = self.move_base.wait_for_result(rospy.Duration(300))
+            self.goal_flag = True
+            if not self.init_flag:
+                finished_within_time = self.move_base.wait_for_result(rospy.Duration(1))
+                self.init_flag = True
+            else:
+                finished_within_time = self.move_base.wait_for_result(rospy.Duration(300))
 
             if not finished_within_time:
                 self.move_base.cancel_goal()
-                rospy.loginfo("Time out achieving goal")
+                self.goal_flag = False
+                if self.init_flag:
+                    rospy.loginfo("Time out achieving goal")
             else:
                 state = self.move_base.get_state()
                 if state == GoalStatus.SUCCEEDED:
                     rospy.loginfo("Goal succeeded")
                 else:
                     rospy.loginfo("Goal failed")
-
+            self.goal_flag = False
+            
             running_time = rospy.Time.now() - start_time
             running_time = running_time.secs / 60.0
 
@@ -101,8 +110,11 @@ class ExploringMaze():
         self.exploring_cmd = msg.data
 
         if self.exploring_cmd is STATUS_CLOSE_TARGET:
-            rospy.loginfo("Stopping the robot...")  
-            self.move_base.cancel_goal() 
+            rospy.loginfo("Stopping the robot...")
+            if self.goal_flag:
+                self.move_base.cancel_goal() 
+                rospy.loginfo("goal cancel")
+                self.goal_flag = False
 
     def shutdown(self):  
         rospy.loginfo("Stopping the robot...")  
