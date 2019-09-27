@@ -60,8 +60,8 @@ class ExploringMaze():
             self.goal.target_pose.header.stamp = rospy.Time.now()
 
             if self.exploring_cmd is STATUS_EXPLORING:
-                self.goal.target_pose.pose.position.x = random.randint(0, 8)
-                self.goal.target_pose.pose.position.y = random.randint(0, 9)
+                self.goal.target_pose.pose.position.x = random.randint(-5, 8)
+                self.goal.target_pose.pose.position.y = random.randint(-5, 9)
             elif self.exploring_cmd is STATUS_CLOSE_TARGET:
                 rospy.sleep(0.1)
                 continue
@@ -77,7 +77,7 @@ class ExploringMaze():
                 finished_within_time = self.move_base.wait_for_result(rospy.Duration(1))
                 self.init_flag = True
             else:
-                finished_within_time = self.move_base.wait_for_result(rospy.Duration(300))
+                finished_within_time = self.move_base.wait_for_result(rospy.Duration(400))
 
             if not finished_within_time:
                 self.move_base.cancel_goal()
